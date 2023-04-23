@@ -1,6 +1,6 @@
 {
   "name": "applist",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "nosdav-applist",
   "main": "index.js",
   "scripts": {
@@ -22,6 +22,5 @@
     "url": "https://github.com/nosdav/applist/issues"
   },
   "homepage": "https://github.com/nosdav/applist#readme",
-  "dependencies": {
-  }
+  "dependencies": {}
 }
