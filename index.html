@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NosDAV Applist</title>
+    <script type="application/ld+json" id="data">
+      [
+        {
+          "@id": "",
+          "storage": "https://localhost:3118",
+          "uri": "index.html",
+          "mode": "m",
+          "relays": [
+            "wss://nostr-pub.wellorder.net",
+            "wss://relay.damus.io",
+            "wss://nostr1.tunnelsats.com",
+            "wss://relay.nostr.info",
+            "wss://nostr-relay.wlvs.space",
+            "wss://nostr.zebedee.cloud",
+            "wss://lbrygen.xyz",
+            "wss://nostr.8e23.net",
+            "wss://nostr.xmr.rocks",
+            "wss://xmr.usenostr.org",
+            "wss://relay.roli.social",
+            "wss://relay.nostr.ro",
+            "wss://nostr.swiss-enigma.ch"
+          ],
+          "mainEntity": {
+            "@type": "NostrPubkey",
+            "name": "Melvin Carvalho",
+            "app": [
+              "https://nosdav.com/todo/",
+              "https://nosdav.com/pastebin/",
+              "https://nosdav.com/bookmarks/",
+              "http://mm.localhost/my-mind/?url=https%3A%2F%2Flocalhost%3A3118%2F2023%2F04%2F23%2Fone.mymind",
+              "http://localhost:3333/"
+            ],
+            "@id": "nostr:pubkey:de7ecd1e2976a6adb2ffa5f4db81a7d812c8bb6698aa00dcf1e76adb55efd645",
+            "image": "https://melvincarvalho.com/m.jpg",
+            "url": "https://melvincarvalho.com/",
+            "description": "Mathematician and Web Developer 𓅦",
+            "banner": "https://void.cat/d/KhHoehWtdyXFjmDh1NxKWZ",
+            "github": "melvincarvalho"
+          }
+        },
+        {
+          "@id": "https://nosdav.com/todo/",
+          "@type": "WebApplication",
+          "label": "Todo"
+        },
+        {
+          "@id": "https://nosdav.com/pastebin/",
+          "@type": "WebApplication",
+          "label": "Pastebin"
+        },
+        {
+          "@id": "https://nosdav.com/bookmarks/",
+          "@type": "WebApplication",
+          "label": "Bookmarks"
+        },
+        {
+          "@id": "http://mm.localhost/my-mind/?url=https%3A%2F%2Flocalhost%3A3118%2F2023%2F04%2F23%2Fone.mymind",
+          "@type": "WebApplication",
+          "label": "Local Mind Map"
+        },
+        {
+          "@id": "http://localhost:3333/",
+          "@type": "WebApplication",
+          "label": "Localhost"
+        }
+      ]
+    </script>
+    <script type="module" src="./app.js"></script>
+  </head>
+  <body></body>
+</html>
