@@ -195,7 +195,7 @@ addButton.addEventListener('click', () => {
       di.data.push(newAppInfo);
 
       // Update mainEntity
-      mainEntity.app.push(appUri);
+      di.data[0].mainEntity.app.push(appUri);
 
       // Add the new app square
       addAppSquare(newAppInfo);
