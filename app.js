@@ -11,7 +11,7 @@ export function getQueryStringValue(key) {
 console.log(9)
 const uri = getQueryStringValue('uri')
 console.log('uri', uri)
-var page
+var page = []
 if (uri) {
   page = await getj(uri)
   console.log('page', page)
