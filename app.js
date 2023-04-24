@@ -109,11 +109,12 @@ class App extends Component {
           const newLabel = prompt('Enter a new label:', appInfo.label);
           if (newLabel !== null && newLabel.trim() !== '') {
             appInfo.label = newLabel.trim();
+            this.setState({}); // Force a re-render of the component
           }
         }}
             style="position: absolute; top: 5px; right: 5px; cursor: pointer;"
           >
-          🔗
+          ✍
           </span>
         </td>
       `;
@@ -149,6 +150,7 @@ class App extends Component {
 
             // Add the new app square
             this.addAppSquare(newAppInfo);
+
           }
         }
       }}
@@ -184,11 +186,12 @@ class App extends Component {
         const newLabel = prompt('Enter a new label:', appInfo.label);
         if (newLabel !== null && newLabel.trim() !== '') {
           appInfo.label = newLabel.trim();
+          this.setState({}); // Force a re-render of the component
         }
       }}
           style="position: absolute; top: 5px; right: 5px; cursor: pointer;"
         >
-          &#9998;
+        ✍
         </span>
       </td>
     `;
@@ -203,7 +206,7 @@ class App extends Component {
   }
 
   render() {
-    const { appRows, addButtonCell } = this.state;
+    const { appRows, addButtonCell, uri } = this.state;
 
     return html`
       <div>
@@ -217,8 +220,8 @@ class App extends Component {
             <tr>${addButtonCell}</tr>
           </tbody>
         </table>
-        <div style="text-align: center; margin: 20px auto;">
-          <button onClick=${() => { this.updateThis() }}>Update this</button>
+        <div style="text-align: center; margin: 20px auto; ">
+          <button onClick=${() => { this.updateThis() }}>Update this</button> <a style="text-decoration: none;" target="_blank" href=${uri}>🔗</a>
         </div>
       </div>
     `;
