@@ -97,8 +97,8 @@ document.body.appendChild(table);
 
 // ... (previous code remains the same)
 
-function updateThis(id) {
-  fetch(location.href)
+function updateThis(id, uri) {
+  fetch(uri || location.href)
     .then((response) =>
       response.text().then((html) => {
         const newhtml = html.replace(
@@ -127,7 +127,7 @@ updateButton.textContent = 'Update this';
 updateButton.setAttribute('style', 'display: block; margin: 20px auto;');
 updateButton.addEventListener('click', () => {
   const id = mainEntity['@id'] || 'your_default_id'; // Replace 'your_default_id' with a suitable default value if needed
-  updateThis(id);
+  updateThis(id, uri);
 });
 
 document.body.appendChild(updateButton);
