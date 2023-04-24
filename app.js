@@ -25,6 +25,8 @@ table.setAttribute('style', 'border-collapse: collapse; width: 80%; margin: 50px
 
 const tableBody = document.createElement('tbody');
 
+// ... (previous code remains the same)
+
 let appRow;
 mainEntity.app.forEach((appUrl, index) => {
   if (index % 3 === 0) {
@@ -44,7 +46,20 @@ mainEntity.app.forEach((appUrl, index) => {
   appLink.textContent = appInfo.label;
   appLink.setAttribute('style', 'text-decoration: none; color: #1a73e8; font-weight: bold; font-size: 1.2em; position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center;');
 
+  const editIcon = document.createElement('span');
+  editIcon.innerHTML = '&#9998;'; // Pencil icon (Unicode character)
+  editIcon.setAttribute('style', 'position: absolute; top: 5px; right: 5px; cursor: pointer;');
+  editIcon.addEventListener('click', (event) => {
+    event.preventDefault();
+    const newLabel = prompt('Enter a new label:', appInfo.label);
+    if (newLabel !== null && newLabel.trim() !== '') {
+      appInfo.label = newLabel.trim();
+      appLink.textContent = appInfo.label;
+    }
+  });
+
   appCell.appendChild(appLink);
+  appCell.appendChild(editIcon);
   appRow.appendChild(appCell);
 });
 
