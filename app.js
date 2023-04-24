@@ -106,7 +106,7 @@ function updateThis(id, uri) {
           '$1' + JSON.stringify(di[id], null, 2) + '$3'
         );
         if (newhtml !== html) {
-          fetch(location.href, {
+          fetch(uri || location.href, {
             method: 'PUT',
             body: newhtml,
             headers: {
@@ -126,7 +126,7 @@ const updateButton = document.createElement('button');
 updateButton.textContent = 'Update this';
 updateButton.setAttribute('style', 'display: block; margin: 20px auto;');
 updateButton.addEventListener('click', () => {
-  const id = mainEntity['@id'] || 'your_default_id'; // Replace 'your_default_id' with a suitable default value if needed
+  const id = 'data'; // Replace 'your_default_id' with a suitable default value if needed
   updateThis(id, uri);
 });
 
