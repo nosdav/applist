@@ -105,7 +105,8 @@ function updateThis(id, uri) {
           /(<script[^>]*type="application[^>]*>)([\s\S]*?)(<\/script>)/gim,
           '$1' + JSON.stringify(di[id], null, 2) + '$3'
         );
-        if (newhtml !== html) {
+        // if (newhtml !== html) {
+        if (1) {
           fetch(uri || location.href, {
             method: 'PUT',
             body: newhtml,
@@ -192,4 +193,4 @@ addButton.addEventListener('click', () => {
 
 addButtonCell.appendChild(addButton);
 appRow.appendChild(addButtonCell);
-// ... (rest of the code remains the same)
+
