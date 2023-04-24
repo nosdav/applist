@@ -166,6 +166,8 @@ function addAppSquare(appInfo) {
   });
 
 
+
+
   appCell.appendChild(appLink);
   appCell.appendChild(editIcon);
   appRow.appendChild(appCell);
@@ -180,16 +182,28 @@ addButtonCell.setAttribute('style', 'border: 1px solid #ccc; padding: 10px; widt
 const addButton = document.createElement('button');
 addButton.textContent = '+';
 addButton.setAttribute('style', 'font-size: 2em; position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; border: none; background-color: transparent;');
+
+
 addButton.addEventListener('click', () => {
-  const uri = prompt('Enter the app URI:');
-  if (uri !== null && uri.trim() !== '') {
-    const label = prompt('Enter the app label:');
-    if (label !== null && label.trim() !== '') {
-      const appInfo = { '@id': uri.trim(), label: label.trim() };
-      addAppSquare(appInfo);
+  const appUri = prompt('Enter the new app URI:');
+  if (appUri !== null && appUri.trim() !== '') {
+    const appLabel = prompt('Enter a label for the new app:');
+    if (appLabel !== null && appLabel.trim() !== '') {
+      const newAppInfo = { '@id': appUri, label: appLabel.trim() };
+
+      // Update di.data
+      di.data.push(newAppInfo);
+
+      // Update mainEntity
+      mainEntity.app.push(appUri);
+
+      // Add the new app square
+      addAppSquare(newAppInfo);
     }
   }
 });
+
+
 
 addButtonCell.appendChild(addButton);
 appRow.appendChild(addButtonCell);
