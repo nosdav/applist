@@ -208,3 +208,21 @@ addButton.addEventListener('click', () => {
 addButtonCell.appendChild(addButton);
 appRow.appendChild(addButtonCell);
 
+
+
+const openUriButton = document.createElement('button');
+openUriButton.innerHTML = '&#128279;'; // Link icon (Unicode character)
+openUriButton.setAttribute('style', 'display: inline-block; margin: 0 5px; background-color: transparent; border: none; color: #1a73e8;');
+openUriButton.addEventListener('click', () => {
+  if (uri) {
+    window.open(uri, '_blank');
+  } else {
+    alert('No URI is available.');
+  }
+});
+
+const buttonContainer = document.createElement('div');
+buttonContainer.setAttribute('style', 'text-align: center; margin: 20px auto;');
+buttonContainer.appendChild(updateButton);
+buttonContainer.appendChild(openUriButton);
+document.body.appendChild(buttonContainer);
