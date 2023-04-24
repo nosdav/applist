@@ -1,6 +1,6 @@
 {
   "name": "nosdav-applist",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "description": "nosdav-applist",
   "main": "index.js",
   "scripts": {
