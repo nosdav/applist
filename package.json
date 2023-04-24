@@ -22,5 +22,7 @@
     "url": "https://github.com/nosdav/applist/issues"
   },
   "homepage": "https://github.com/nosdav/applist#readme",
-  "dependencies": {}
+  "dependencies": {
+    "getj": "^0.0.11"
+  }
 }
