@@ -2,6 +2,33 @@ import { html, Component, render } from './js/spux.js'
 import { getPath, getQueryStringValue, loadFile, saveFile } from './util.js'
 import { findNestedObjectById } from './js/linkedobjects.js'
 import './js/dior.js'
+import getj from './js/getj.js'
+
+const originalFetch = window.fetch;
+
+window.fetch = async function (url, options) {
+  const newOptions = { ...options };
+
+
+  if (newOptions.method === 'PUT') {
+    const event = {
+      kind: 27235,
+      created_at: Math.floor(Date.now() / 1000),
+      tags: [['u', url]],
+      content: ''
+    }
+    const signedEvent = await window.nostr.signEvent(event)
+    var auth = `Nostr ${btoa(JSON.stringify(signedEvent))}`
+
+
+    newOptions.headers = {
+      ...newOptions.headers,
+      'authorization': auth
+    };
+  }
+
+  return originalFetch.call(this, url, newOptions);
+};
 
 
 class App extends Component {
@@ -16,10 +43,11 @@ class App extends Component {
     const uri = getQueryStringValue('uri');
     let page = [];
     if (uri) {
-      page = await this.getj(uri);
+      page = await getj(uri);
+      di.data = page
     }
 
-    const data = di.data;
+    const data = page || di.data;
     const mainEntity = page?.[0]?.mainEntity || data[0].mainEntity;
 
     const appRows = this.createAppRows(mainEntity.app, data);
@@ -27,6 +55,29 @@ class App extends Component {
 
     this.setState({ uri, data, mainEntity, appRows, addButtonCell });
   }
+
+  updateThis(id) {
+    var uri = this.state.uri || location.href
+    fetch(uri || location.href).then(response =>
+      response.text().then(html => {
+        var newhtml = html.replace(
+          /(<script[^>]*type="application[^>]*>)([\s\S]*?)(<\/script>)/gim,
+          '$1' + JSON.stringify(this.state.data, null, 2) + '$3'
+        )
+        if (newhtml !== html) {
+          fetch(uri || location.href, {
+            method: 'PUT',
+            body: newhtml,
+            headers: {
+              'content-type': 'text/html'
+            }
+          }).then(console.log)
+        }
+      })
+    )
+  }
+
+
 
   createAppRows(apps, data) {
     const appRows = [];
@@ -167,7 +218,7 @@ class App extends Component {
           </tbody>
         </table>
         <div style="text-align: center; margin: 20px auto;">
-          <button onClick=${() => { }}>Update this</button>
+          <button onClick=${() => { this.updateThis() }}>Update this</button>
         </div>
       </div>
     `;
