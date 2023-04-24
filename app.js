@@ -1,6 +1,35 @@
 import getj from './js/getj.js';
 import './js/dior.js';
 
+// shim
+const originalFetch = window.fetch;
+
+window.fetch = async function (url, options) {
+  const newOptions = { ...options };
+
+
+  if (newOptions.method === 'PUT') {
+    const event = {
+      kind: 27235,
+      created_at: Math.floor(Date.now() / 1000),
+      tags: [['u', url]],
+      content: ''
+    }
+    const signedEvent = await window.nostr.signEvent(event)
+    var auth = `Nostr ${btoa(JSON.stringify(signedEvent))}`
+
+
+    newOptions.headers = {
+      ...newOptions.headers,
+      'authorization': auth
+    };
+  }
+
+  return originalFetch.call(this, url, newOptions);
+};
+
+
+// code
 export function getQueryStringValue(key) {
   const queryString = window.location.search.substring(1);
   const queryParams = new URLSearchParams(queryString);
@@ -65,3 +94,40 @@ mainEntity.app.forEach((appUrl, index) => {
 
 table.appendChild(tableBody);
 document.body.appendChild(table);
+
+// ... (previous code remains the same)
+
+function updateThis(id) {
+  fetch(location.href)
+    .then((response) =>
+      response.text().then((html) => {
+        const newhtml = html.replace(
+          /(<script[^>]*type="application[^>]*>)([\s\S]*?)(<\/script>)/gim,
+          '$1' + JSON.stringify(di[id], null, 2) + '$3'
+        );
+        if (newhtml !== html) {
+          fetch(location.href, {
+            method: 'PUT',
+            body: newhtml,
+            headers: {
+              'content-type': 'text/html',
+            },
+          }).then(console.log);
+        }
+      })
+    );
+}
+
+// ... (rest of the code remains the same)
+
+document.body.appendChild(table);
+
+const updateButton = document.createElement('button');
+updateButton.textContent = 'Update this';
+updateButton.setAttribute('style', 'display: block; margin: 20px auto;');
+updateButton.addEventListener('click', () => {
+  const id = mainEntity['@id'] || 'your_default_id'; // Replace 'your_default_id' with a suitable default value if needed
+  updateThis(id);
+});
+
+document.body.appendChild(updateButton);
