@@ -19,7 +19,7 @@ if (uri) {
 
 console.log('DOMContentLoaded')
 const data = di.data
-const mainEntity = page[0].mainEntity || data[0].mainEntity
+const mainEntity = page?.[0]?.mainEntity || data[0].mainEntity
 
 const table = document.createElement('table')
 table.setAttribute('style', 'border-collapse: collapse; width: 80%; margin: 50px auto; font-family: Arial, sans-serif;')
