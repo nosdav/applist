@@ -32,7 +32,7 @@ mainEntity.app.forEach((appUrl, index) => {
     tableBody.appendChild(appRow);
   }
 
-  const appInfo = data.find((item) => item['@id'] === appUrl);
+  const appInfo = data.find((item) => item['@id'] === appUrl) || { '@id': appUrl, label: appUrl };
 
   const appCell = document.createElement('td');
   const backgroundColor = index % 6 < 3 ? '#e0f2ff' : '#c8e1ff';
