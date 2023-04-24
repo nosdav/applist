@@ -1,228 +1,177 @@
-import getj from './js/getj.js';
-import './js/dior.js';
-
-// shim
-const originalFetch = window.fetch;
-
-window.fetch = async function (url, options) {
-  const newOptions = { ...options };
+import { html, Component, render } from './js/spux.js'
+import { getPath, getQueryStringValue, loadFile, saveFile } from './util.js'
+import { findNestedObjectById } from './js/linkedobjects.js'
+import './js/dior.js'
 
 
-  if (newOptions.method === 'PUT') {
-    const event = {
-      kind: 27235,
-      created_at: Math.floor(Date.now() / 1000),
-      tags: [['u', url]],
-      content: ''
+class App extends Component {
+  state = {
+    uri: '',
+    data: [],
+    mainEntity: null,
+    appRows: [],
+  };
+
+  async componentDidMount() {
+    const uri = getQueryStringValue('uri');
+    let page = [];
+    if (uri) {
+      page = await this.getj(uri);
     }
-    const signedEvent = await window.nostr.signEvent(event)
-    var auth = `Nostr ${btoa(JSON.stringify(signedEvent))}`
 
+    const data = di.data;
+    const mainEntity = page?.[0]?.mainEntity || data[0].mainEntity;
 
-    newOptions.headers = {
-      ...newOptions.headers,
-      'authorization': auth
-    };
+    const appRows = this.createAppRows(mainEntity.app, data);
+    const addButtonCell = this.createAddButtonCell();
+
+    this.setState({ uri, data, mainEntity, appRows, addButtonCell });
   }
 
-  return originalFetch.call(this, url, newOptions);
-};
+  createAppRows(apps, data) {
+    const appRows = [];
+    let appRow = [];
 
+    apps.forEach((appUrl, index) => {
+      if (index % 3 === 0 && appRow.length > 0) {
+        appRows.push(appRow);
+        appRow = [];
+      }
 
-// code
-export function getQueryStringValue(key) {
-  const queryString = window.location.search.substring(1);
-  const queryParams = new URLSearchParams(queryString);
-  return queryParams.get(key);
-}
+      const appInfo = data.find((item) => item['@id'] === appUrl) || { '@id': appUrl, label: appUrl };
+      const backgroundColor = index % 6 < 3 ? '#e0f2ff' : '#c8e1ff';
 
-console.log(9);
-const uri = getQueryStringValue('uri');
-console.log('uri', uri);
-let page = [];
-if (uri) {
-  page = await getj(uri);
-  console.log('page', page);
-}
+      const appCell = html`
+        <td
+          style="border: 1px solid #ccc; padding: 10px; width: 33%; height: 0; padding-bottom: 20%; position: relative; background-color: ${backgroundColor};"
+        >
+          <a
+            href=${appInfo['@id']}
+            target="_blank"
+            style="text-decoration: none; color: #1a73e8; font-weight: bold; font-size: 1.2em; position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center;"
+          >
+            ${appInfo.label}
+          </a>
+          <span
+            onClick=${(event) => {
+          event.preventDefault();
+          const newLabel = prompt('Enter a new label:', appInfo.label);
+          if (newLabel !== null && newLabel.trim() !== '') {
+            appInfo.label = newLabel.trim();
+          }
+        }}
+            style="position: absolute; top: 5px; right: 5px; cursor: pointer;"
+          >
+          🔗
+          </span>
+        </td>
+      `;
 
-console.log('DOMContentLoaded');
-const data = di.data;
-const mainEntity = page?.[0]?.mainEntity || data[0].mainEntity;
+      appRow.push(appCell);
+    });
 
-const table = document.createElement('table');
-table.setAttribute('style', 'border-collapse: collapse; width: 80%; margin: 50px auto; font-family: Arial, sans-serif;');
+    if (appRow.length > 0) {
+      appRows.push(appRow);
+    }
 
-const tableBody = document.createElement('tbody');
-
-// ... (previous code remains the same)
-
-let appRow;
-mainEntity.app.forEach((appUrl, index) => {
-  if (index % 3 === 0) {
-    appRow = document.createElement('tr');
-    tableBody.appendChild(appRow);
+    return appRows;
   }
 
-  const appInfo = data.find((item) => item['@id'] === appUrl) || { '@id': appUrl, label: appUrl };
+  createAddButtonCell() {
+    const addButtonCell = html`
+      <td
+        style="border: 1px solid #ccc; padding: 10px; width: 33%; height: 0; padding-bottom: 20%; position: relative; background-color: #fff;"
+      >
+        <button
+          onClick=${() => {
+        const appUri = prompt('Enter the new app URI:');
+        if (appUri !== null && appUri.trim() !== '') {
+          const appLabel = prompt('Enter a label for the new app:');
+          if (appLabel !== null && appLabel.trim() !== '') {
 
-  const appCell = document.createElement('td');
-  const backgroundColor = index % 6 < 3 ? '#e0f2ff' : '#c8e1ff';
-  appCell.setAttribute('style', `border: 1px solid #ccc; padding: 10px; width: 33%; height: 0; padding-bottom: 20%; position: relative; background-color: ${backgroundColor};`);
+            const newAppInfo = { '@id': appUri, label: appLabel.trim() };
+            // Update di.data
+            di.data.push(newAppInfo);
 
-  const appLink = document.createElement('a');
-  appLink.href = appInfo['@id'];
-  appLink.target = '_blank';
-  appLink.textContent = appInfo.label;
-  appLink.setAttribute('style', 'text-decoration: none; color: #1a73e8; font-weight: bold; font-size: 1.2em; position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center;');
+            // Update mainEntity
+            di.data[0].mainEntity.app.push(appUri);
 
-  const editIcon = document.createElement('span');
-  editIcon.innerHTML = '&#9998;'; // Pencil icon (Unicode character)
-  editIcon.setAttribute('style', 'position: absolute; top: 5px; right: 5px; cursor: pointer;');
-  editIcon.addEventListener('click', (event) => {
-    event.preventDefault();
-    const newLabel = prompt('Enter a new label:', appInfo.label);
-    if (newLabel !== null && newLabel.trim() !== '') {
-      appInfo.label = newLabel.trim();
-      appLink.textContent = appInfo.label;
-    }
-  });
-
-  appCell.appendChild(appLink);
-  appCell.appendChild(editIcon);
-  appRow.appendChild(appCell);
-});
-
-table.appendChild(tableBody);
-document.body.appendChild(table);
-
-// ... (previous code remains the same)
-
-function updateThis(id, uri) {
-  fetch(uri || location.href)
-    .then((response) =>
-      response.text().then((html) => {
-        const newhtml = html.replace(
-          /(<script[^>]*type="application[^>]*>)([\s\S]*?)(<\/script>)/gim,
-          '$1' + JSON.stringify(di[id], null, 2) + '$3'
-        );
-        // if (newhtml !== html) {
-        if (1) {
-          fetch(uri || location.href, {
-            method: 'PUT',
-            body: newhtml,
-            headers: {
-              'content-type': 'text/html',
-            },
-          }).then(console.log);
+            // Add the new app square
+            this.addAppSquare(newAppInfo);
+          }
         }
-      })
-    );
+      }}
+          style="font-size: 2em; position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; border: none; background-color: transparent;"
+        >
+          +
+        </button>
+      </td>
+    `;
+
+    return addButtonCell;
+  }
+
+  addAppSquare(appInfo) {
+    const { appRows } = this.state;
+    const index = this.state.mainEntity.app.length;
+    const backgroundColor = index % 6 < 3 ? '#e0f2ff' : '#c8e1ff';
+
+    const appCell = html`
+      <td
+        style="border: 1px solid #ccc; padding: 10px; width: 33%; height: 0; padding-bottom: 20%; position: relative; background-color: ${backgroundColor};"
+      >
+        <a
+          href=${appInfo['@id']}
+          target="_blank"
+          style="text-decoration: none; color: #1a73e8; font-weight: bold; font-size: 1.2em; position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center;"
+        >
+          ${appInfo.label}
+        </a>
+        <span
+          onClick=${(event) => {
+        event.preventDefault();
+        const newLabel = prompt('Enter a new label:', appInfo.label);
+        if (newLabel !== null && newLabel.trim() !== '') {
+          appInfo.label = newLabel.trim();
+        }
+      }}
+          style="position: absolute; top: 5px; right: 5px; cursor: pointer;"
+        >
+          &#9998;
+        </span>
+      </td>
+    `;
+
+    if (appRows.length === 0 || appRows[appRows.length - 1].length === 3) {
+      appRows.push([appCell]);
+    } else {
+      appRows[appRows.length - 1].push(appCell);
+    }
+
+    this.setState({ appRows });
+  }
+
+  render() {
+    const { appRows, addButtonCell } = this.state;
+
+    return html`
+      <div>
+        <table
+          style="border-collapse: collapse; width: 80%; margin: 50px auto; font-family: Arial, sans-serif;"
+        >
+          <tbody>
+            ${appRows.map((row) => html`
+              <tr>${row}</tr>
+            `)}
+            <tr>${addButtonCell}</tr>
+          </tbody>
+        </table>
+        <div style="text-align: center; margin: 20px auto;">
+          <button onClick=${() => { }}>Update this</button>
+        </div>
+      </div>
+    `;
+  }
 }
 
-// ... (rest of the code remains the same)
-
-document.body.appendChild(table);
-
-const updateButton = document.createElement('button');
-updateButton.textContent = 'Update this';
-updateButton.setAttribute('style', 'display: block; margin: 20px auto;');
-updateButton.addEventListener('click', () => {
-  const id = 'data'; // Replace 'your_default_id' with a suitable default value if needed
-  updateThis(id, uri);
-});
-
-document.body.appendChild(updateButton);
-
-
-
-// ... (previous code remains the same)
-function addAppSquare(appInfo) {
-  const index = mainEntity.app.length;
-  if (index % 3 === 0) {
-    appRow = document.createElement('tr');
-    tableBody.appendChild(appRow);
-  }
-
-  const appCell = document.createElement('td');
-  const backgroundColor = index % 6 < 3 ? '#e0f2ff' : '#c8e1ff';
-  appCell.setAttribute('style', `border: 1px solid #ccc; padding: 10px; width: 33%; height: 0; padding-bottom: 20%; position: relative; background-color: ${backgroundColor};`);
-
-  const appLink = document.createElement('a');
-  appLink.href = appInfo['@id'];
-  appLink.target = '_blank';
-  appLink.textContent = appInfo.label;
-  appLink.setAttribute('style', 'text-decoration: none; color: #1a73e8; font-weight: bold; font-size: 1.2em; position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center;');
-
-  const editIcon = document.createElement('span');
-  editIcon.innerHTML = '&#9998;'; // Pencil icon (Unicode character)
-  editIcon.setAttribute('style', 'position: absolute; top: 5px; right: 5px; cursor: pointer;');
-  editIcon.addEventListener('click', (event) => {
-    event.preventDefault();
-    const newLabel = prompt('Enter a new label:', appInfo.label);
-    if (newLabel !== null && newLabel.trim() !== '') {
-      appInfo.label = newLabel.trim();
-      appLink.textContent = appInfo.label;
-    }
-  });
-
-
-
-
-  appCell.appendChild(appLink);
-  appCell.appendChild(editIcon);
-  appRow.appendChild(appCell);
-  mainEntity.app.push(appInfo['@id']);
-
-}
-
-// ... (rest of the code remains the same)
-
-const addButtonCell = document.createElement('td');
-addButtonCell.setAttribute('style', 'border: 1px solid #ccc; padding: 10px; width: 33%; height: 0; padding-bottom: 20%; position: relative; background-color: #fff;');
-const addButton = document.createElement('button');
-addButton.textContent = '+';
-addButton.setAttribute('style', 'font-size: 2em; position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; border: none; background-color: transparent;');
-
-
-addButton.addEventListener('click', () => {
-  const appUri = prompt('Enter the new app URI:');
-  if (appUri !== null && appUri.trim() !== '') {
-    const appLabel = prompt('Enter a label for the new app:');
-    if (appLabel !== null && appLabel.trim() !== '') {
-      const newAppInfo = { '@id': appUri, label: appLabel.trim() };
-
-      // Update di.data
-      di.data.push(newAppInfo);
-
-      // Update mainEntity
-      di.data[0].mainEntity.app.push(appUri);
-
-      // Add the new app square
-      addAppSquare(newAppInfo);
-    }
-  }
-});
-
-
-
-addButtonCell.appendChild(addButton);
-appRow.appendChild(addButtonCell);
-
-
-
-const openUriButton = document.createElement('button');
-openUriButton.innerHTML = '&#128279;'; // Link icon (Unicode character)
-openUriButton.setAttribute('style', 'display: inline-block; margin: 0 5px; background-color: transparent; border: none; color: #1a73e8;');
-openUriButton.addEventListener('click', () => {
-  if (uri) {
-    window.open(uri, '_blank');
-  } else {
-    alert('No URI is available.');
-  }
-});
-
-const buttonContainer = document.createElement('div');
-buttonContainer.setAttribute('style', 'text-align: center; margin: 20px auto;');
-buttonContainer.appendChild(updateButton);
-buttonContainer.appendChild(openUriButton);
-document.body.appendChild(buttonContainer);
+render(html`<${App} />`, document.body);
