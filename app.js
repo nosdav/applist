@@ -1,4 +1,4 @@
-import getj from './js/getj'
+import getj from './js/getj.js'
 import './js/dior.js'
 
 
